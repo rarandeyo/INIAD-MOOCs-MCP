@@ -24,6 +24,10 @@ import pdf from './tools/pdf';
 import snapshot from './tools/snapshot';
 import tabs from './tools/tabs';
 import screen from './tools/screen';
+import login from './tools/login';
+import selectCourse from './tools/selectCourse';
+import selectLecture from './tools/selectLecture';
+import selectSlide from './tools/selectSlide';
 import { console as consoleResource } from './resources/console';
 
 import type { Tool, ToolCapability } from './tools/tool';
@@ -40,6 +44,10 @@ const snapshotTools: Tool[] = [
   ...pdf,
   ...snapshot,
   ...tabs(true),
+  ...login,
+  ...selectCourse,
+  ...selectLecture,
+  ...selectSlide,
 ];
 
 const screenshotTools: Tool[] = [
@@ -51,6 +59,10 @@ const screenshotTools: Tool[] = [
   ...pdf,
   ...screen,
   ...tabs(false),
+  ...login,
+  ...selectCourse,
+  ...selectLecture,
+  ...selectSlide,
 ];
 
 const resources: Resource[] = [
