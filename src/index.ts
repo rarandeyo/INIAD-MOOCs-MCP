@@ -25,12 +25,11 @@ import snapshot from './tools/snapshot';
 import tabs from './tools/tabs';
 import screen from './tools/screen';
 import login from './tools/login';
-import selectCourse from './tools/selectCourse';
 import getHtml from './tools/getHtml';
 import listLectures from './tools/listLectures';
 import listSlides from './tools/listSlides';
+import listCourses from './tools/listCourses'; // Added
 import { console as consoleResource } from './resources/console';
-
 import type { Tool, ToolCapability } from './tools/tool';
 import type { Resource } from './resources/resource';
 import type { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -46,10 +45,10 @@ const snapshotTools: Tool[] = [
   ...snapshot,
   ...tabs(true),
   ...login,
-  ...selectCourse,
   ...getHtml,
   ...listLectures,
   ...listSlides,
+  ...listCourses, // Added
 ];
 
 const screenshotTools: Tool[] = [
@@ -62,10 +61,10 @@ const screenshotTools: Tool[] = [
   ...screen,
   ...tabs(false),
   ...login,
-  ...selectCourse,
   ...getHtml,
   ...listLectures,
   ...listSlides,
+  ...listCourses, // Added
 ];
 
 const resources: Resource[] = [
