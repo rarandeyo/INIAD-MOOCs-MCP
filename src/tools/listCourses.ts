@@ -17,6 +17,7 @@
 import type { Context } from '../context';
 import type { Tool, ToolResult } from './tool';
 import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 
 // No input needed for listing courses
 const ListCoursesInputSchema = z.object({});
@@ -37,12 +38,12 @@ const listCoursesTool: Tool = {
   schema: {
     name: 'listCourses',
     description: 'Lists all available courses (id, title, URL) found on the main courses page (https://moocs.iniad.org/courses). Returns a JSON string representing an object with a "courses" array.',
-    inputSchema: ListCoursesInputSchema,
+    inputSchema: zodToJsonSchema(ListCoursesInputSchema),
   },
 
   capability: 'core',
 
-  async handle(context: Context, params?: Record<string, any>): Promise<ToolResult> {
+  async handle(context: Context, params?: unknown): Promise<ToolResult> {
     try {
       const tab = await context.ensureTab();
       const page = tab.page;
@@ -99,8 +100,15 @@ const listCoursesTool: Tool = {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to list courses:', error);
+      let errorMessage = 'An unknown error occurred';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else {
+        errorMessage = String(error); // Fallback for non-Error types
+      }
+      // Screenshot attempt within the catch block
       try {
         const tab = context.currentTab();
         if (tab) {
@@ -113,7 +121,7 @@ const listCoursesTool: Tool = {
         console.error('Failed to take screenshot:', screenshotError);
       }
       return {
-        content: [{ type: 'text', text: `Failed to list courses: ${error.message}` }],
+        content: [{ type: 'text', text: `Failed to list courses: ${errorMessage}` }],
         isError: true,
       };
     }

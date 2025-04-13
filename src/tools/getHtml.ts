@@ -17,6 +17,7 @@
 import type { Context } from '../context';
 import type { Tool, ToolResult } from './tool';
 import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 // McpError and ErrorCode removed as they are not used in this specific tool
 
 const GetHtmlInputSchema = z.object({}); // No input needed
@@ -25,12 +26,12 @@ const getPageHtmlTool: Tool = {
   schema: {
     name: 'getPageHtml',
     description: 'Gets the full HTML source code of the current page.',
-    inputSchema: GetHtmlInputSchema,
+    inputSchema: zodToJsonSchema(GetHtmlInputSchema),
   },
 
   capability: 'core', // Or another appropriate capability
 
-  async handle(context: Context, params?: Record<string, any>): Promise<ToolResult> {
+  async handle(context: Context, params?: unknown): Promise<ToolResult> {
     try {
       const tab = await context.ensureTab(); // Ensure there is an active tab
       const page = tab.page;
@@ -43,8 +44,14 @@ const getPageHtmlTool: Tool = {
         content: [{ type: 'text', text: htmlContent }],
       };
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to get page HTML:', error);
+      let errorMessage = 'An unknown error occurred';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else {
+        errorMessage = String(error); // Fallback for non-Error types
+      }
       // Attempt to take screenshot on error
       try {
         const tab = context.currentTab();
@@ -59,7 +66,7 @@ const getPageHtmlTool: Tool = {
       }
       // Return error message
       return {
-        content: [{ type: 'text', text: `Failed to get page HTML: ${error.message}` }],
+        content: [{ type: 'text', text: `Failed to get page HTML: ${errorMessage}` }],
         isError: true,
       };
     }

@@ -17,6 +17,7 @@
 import type { Context } from '../context';
 import type { Tool, ToolResult } from './tool';
 import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 
 // No input needed for listing slides
 const ListSlidesInputSchema = z.object({});
@@ -37,12 +38,12 @@ const listSlideLinksTool: Tool = {
   schema: {
     name: 'listSlideLinks',
     description: 'Lists all available slide links (slide number, title, URL) found in the page navigation of the current lecture page. Returns a JSON string representing an object with a "slides" array.',
-    inputSchema: ListSlidesInputSchema,
+    inputSchema: zodToJsonSchema(ListSlidesInputSchema),
   },
 
   capability: 'core',
 
-  async handle(context: Context, params?: Record<string, any>): Promise<ToolResult> {
+  async handle(context: Context, params?: unknown): Promise<ToolResult> {
     try {
       const tab = await context.ensureTab();
       const page = tab.page;
@@ -75,7 +76,7 @@ const listSlideLinksTool: Tool = {
       }
 
       // Sort slides by slide number numerically
-      slideData.sort((a, b) => parseInt(a.slideNumber, 10) - parseInt(b.slideNumber, 10));
+      slideData.sort((a, b) => Number.parseInt(a.slideNumber, 10) - Number.parseInt(b.slideNumber, 10));
 
 
       console.log(`Found ${slideData.length} unique slide links.`);
@@ -87,8 +88,14 @@ const listSlideLinksTool: Tool = {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to list slide links:', error);
+      let errorMessage = 'An unknown error occurred';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else {
+        errorMessage = String(error); // Fallback for non-Error types
+      }
       try {
         const tab = context.currentTab();
         if (tab) {
@@ -101,7 +108,7 @@ const listSlideLinksTool: Tool = {
         console.error('Failed to take screenshot:', screenshotError);
       }
       return {
-        content: [{ type: 'text', text: `Failed to list slide links: ${error.message}` }],
+        content: [{ type: 'text', text: `Failed to list slide links: ${errorMessage}` }],
         isError: true,
       };
     }
