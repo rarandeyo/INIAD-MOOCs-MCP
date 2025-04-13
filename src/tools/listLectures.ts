@@ -104,11 +104,10 @@ const listLectureLinksTool: Tool = {
     } catch (error) {
       console.error('Failed to list lecture links:', error);
       let errorMessage = 'An unknown error occurred';
-      if (error instanceof Error) {
+      if (error instanceof Error)
         errorMessage = error.message;
-      } else {
+      else
         errorMessage = String(error); // Fallback for non-Error types
-      }
       try {
         const tab = context.currentTab();
         if (tab) {

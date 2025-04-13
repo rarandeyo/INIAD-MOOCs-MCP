@@ -47,11 +47,10 @@ const getPageHtmlTool: Tool = {
     } catch (error) {
       console.error('Failed to get page HTML:', error);
       let errorMessage = 'An unknown error occurred';
-      if (error instanceof Error) {
+      if (error instanceof Error)
         errorMessage = error.message;
-      } else {
+      else
         errorMessage = String(error); // Fallback for non-Error types
-      }
       // Attempt to take screenshot on error
       try {
         const tab = context.currentTab();
