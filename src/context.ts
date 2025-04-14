@@ -172,7 +172,7 @@ export class Context {
   }
 }
 
-class Tab {
+export class Tab {
   readonly context: Context;
   readonly page: playwright.Page;
   private _console: playwright.ConsoleMessage[] = [];
