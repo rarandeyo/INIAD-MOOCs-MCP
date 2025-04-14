@@ -42,7 +42,7 @@ const submitAssignment: Tool = {
   capability: 'core',
   schema: {
     name: 'submit_assignment',
-    description: 'Performs a sequence of form interactions (typing, clicking, checking, selecting, uploading) and clicks the submit button, based on a pre-existing page snapshot. Handles file uploads internally by clicking the trigger and waiting for the file chooser. Does not handle page navigation or confirm alerts.',
+    description: 'Specifically designed for submitting assignments on platforms like INIAD MOOCs. Performs a sequence of form interactions (typing, file uploads, etc.) and clicks the final submit button, based on a pre-existing page snapshot. Use this tool for submitting assignments instead of individual click/type/upload actions. Handles file uploads internally. Does not handle page navigation or confirm alerts.',
     inputSchema: zodToJsonSchema(submitAssignmentSchema),
   },
 
