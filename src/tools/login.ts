@@ -15,7 +15,7 @@
  */
 
 import type { Context } from '../context';
-import type { Tool, ToolResult } from './tool'; // Import ToolResult
+import type { Tool, ToolResult } from './tool';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
@@ -30,10 +30,7 @@ const loginTool: Tool = {
 
   capability: 'core',
 
-  // Adjust handle signature to match SDK expectations
   async handle(context: Context, params?: unknown): Promise<ToolResult> {
-    // Ensure environment variables are set
-    // Use INIAD credentials from environment variables
     const username = process.env.INIAD_USERNAME;
     const password = process.env.INIAD_PASSWORD;
 
@@ -45,7 +42,6 @@ const loginTool: Tool = {
     }
 
     try {
-      // Use context.ensureTab() to get the current tab/page
       const tab = await context.ensureTab();
       const page = tab.page;
 
@@ -54,20 +50,16 @@ const loginTool: Tool = {
 
       console.log('Checking for "Sign in with INIAD Account" link...');
       const signInLink = page.locator('text="Sign in with INIAD Account"');
-      if (await signInLink.isVisible({ timeout: 1000 })) { // Check visibility with short timeout
+      if (await signInLink.isVisible({ timeout: 1000 })) {
         console.log('Link found, clicking "Sign in with INIAD Account"...');
         await signInLink.click();
       } else {
         console.log('"Sign in with INIAD Account" link not found, assuming already logged in.');
-        // If the link is not visible, assume already logged in or on the ID manager page
-        // Check if we are already on the ID manager page
         const usernameSelector = 'input#username, input[name="username"], input[ref=s1e16]';
         const isOnIdManager = await page.locator(usernameSelector).isVisible({ timeout: 1000 });
         if (!isOnIdManager) {
-          // If not on ID manager and no sign-in link, likely already logged into MOOCs
           console.log('Not on ID Manager page, proceeding as logged in.');
-          // Skip ID manager steps and directly check for MOOCs success indicator
-          const moocsLoginSuccessIndicatorSelector = 'body'; // Placeholder
+          const moocsLoginSuccessIndicatorSelector = 'body';
           try {
             await page.waitForSelector(moocsLoginSuccessIndicatorSelector, { state: 'visible', timeout: 1000 });
             console.log('Already logged in to INIAD MOOCs.');
@@ -75,22 +67,18 @@ const loginTool: Tool = {
             return { content: [{ type: 'text', text: JSON.stringify(result) }] };
           } catch (e) {
             console.log('Could not confirm MOOCs login state, proceeding to ID Manager check just in case.');
-            // Fall through to ID manager login attempt if unsure
           }
         } else {
           console.log('Detected ID Manager page.');
         }
       }
 
-      // --- INIAD ID Manager Login Flow ---
-      // Check if we need to perform the ID manager login steps
       const usernameSelectorCheck = 'input#username, input[name="username"], input[ref=s1e16]';
       if (await page.locator(usernameSelectorCheck).isVisible({ timeout: 1000 })) {
         console.log('Proceeding with INIAD ID Manager login...');
         const passwordSelector = 'input#password, input[name="password"], input[ref=s1e18]';
         const loginButtonSelector = 'input[type="submit"][value="LOG IN"], button:has-text("LOG IN"), button[ref=s1e23]';
 
-        // No need to wait again if already checked visibility
         console.log('Entering INIAD username...');
         await page.locator(usernameSelectorCheck).fill(username);
 
@@ -101,24 +89,19 @@ const loginTool: Tool = {
         await page.locator(loginButtonSelector).click();
 
         console.log('Waiting for redirection back to INIAD MOOCs and login confirmation...');
-        await page.waitForURL('**/moocs.iniad.org/**', { timeout: 1000 }); // Shortened timeout
-        const moocsLoginSuccessIndicatorSelector = 'body'; // Placeholder
-        await page.waitForSelector(moocsLoginSuccessIndicatorSelector, { state: 'visible', timeout: 1000 }); // Shortened timeout
+        await page.waitForURL('**/moocs.iniad.org/**', { timeout: 1000 });
+        const moocsLoginSuccessIndicatorSelector = 'body';
+        await page.waitForSelector(moocsLoginSuccessIndicatorSelector, { state: 'visible', timeout: 1000 });
 
         console.log('Login successful!');
         const result = { success: true, message: 'Successfully logged in to INIAD MOOCs using INIAD Account.' };
         return { content: [{ type: 'text', text: JSON.stringify(result) }] };
       }
-      // If username field is not visible, assume login was successful or handled previously (else removed)
       console.log('ID Manager login step skipped or already completed.');
-      // Verify login state on MOOCs again if needed, or return success if handled by the initial check
-      const moocsLoginSuccessIndicatorSelector = 'body'; // Placeholder
+      const moocsLoginSuccessIndicatorSelector = 'body';
       try {
         await page.waitForSelector(moocsLoginSuccessIndicatorSelector, { state: 'visible', timeout: 1000 });
         console.log('Confirmed login state on INIAD MOOCs.');
-        // Check if a result was already returned by the initial "already logged in" check
-        // If not, return a generic success message here.
-        // This path might be reached if the initial check wasn't certain.
         const result = { success: true, message: 'Login to INIAD MOOCs confirmed.' };
         return { content: [{ type: 'text', text: JSON.stringify(result) }] };
       } catch (e) {
@@ -126,20 +109,13 @@ const loginTool: Tool = {
         return { content: [{ type: 'text', text: 'Login failed: Could not confirm final login state.' }], isError: true };
       }
 
-      // The logic for ID Manager login is now integrated into the conditional block above.
-      // This section is removed as its logic is handled earlier.
-
-      // Success messages are now returned within the conditional logic blocks above.
-      // This specific block is removed as it's now redundant.
-
     } catch (error) {
       console.error('Login failed:', error);
       let errorMessage = 'An unknown error occurred';
       if (error instanceof Error)
         errorMessage = error.message;
       else
-        errorMessage = String(error); // Fallback for non-Error types
-      // Screenshot logic removed as requested.
+        errorMessage = String(error);
       return {
         content: [{ type: 'text', text: `Login failed: ${errorMessage}` }],
         isError: true,

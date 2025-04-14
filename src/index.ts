@@ -28,9 +28,8 @@ import login from './tools/login';
 import getHtml from './tools/getHtml';
 import listLectures from './tools/listLectures';
 import listSlides from './tools/listSlides';
-import listCourses from './tools/listCourses'; // Added
-import submitAssignment from './tools/submitAssignment'; // 修正されたツールをインポート
-// import confirmSubmissionAlert from './tools/confirmSubmissionAlert'; // 不要になったため削除
+import listCourses from './tools/listCourses';
+import submitAssignment from './tools/submitAssignment';
 import { console as consoleResource } from './resources/console';
 import type { Tool, ToolCapability } from './tools/tool';
 import type { Resource } from './resources/resource';
@@ -50,9 +49,8 @@ const snapshotTools: Tool[] = [
   ...getHtml,
   ...listLectures,
   ...listSlides,
-  ...listCourses, // Added
-  ...submitAssignment, // 修正された submit_assignment を登録
-  // ...confirmSubmissionAlert, // 不要になったため削除
+  ...listCourses,
+  ...submitAssignment,
 ];
 
 const screenshotTools: Tool[] = [
@@ -68,7 +66,7 @@ const screenshotTools: Tool[] = [
   ...getHtml,
   ...listLectures,
   ...listSlides,
-  ...listCourses, // Added
+  ...listCourses,
 ];
 
 const resources: Resource[] = [

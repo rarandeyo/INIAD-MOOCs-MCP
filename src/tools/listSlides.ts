@@ -19,17 +19,14 @@ import type { Tool, ToolResult } from './tool';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-// No input needed for listing slides
 const ListSlidesInputSchema = z.object({});
 
-// Define the structure for each slide link found, now including title
 const SlideLinkSchema = z.object({
   slideNumber: z.string().describe('The page number or identifier of the slide link.'),
   title: z.string().describe('The title of the slide (from the link\'s title attribute).'),
   url: z.string().url().describe('The absolute URL of the slide page.'),
 });
 
-// Define the output structure
 const ListSlidesOutputSchema = z.object({
   slides: z.array(SlideLinkSchema).describe('A list of slide links (number, title, URL) found in the page navigation.'),
 });
@@ -51,23 +48,19 @@ const listSlideLinksTool: Tool = {
 
       console.log('Listing slide links (including titles) from page navigation...');
 
-      // Selector for links within the page navigation
       const slideLinksLocator = page.locator('nav[aria-label="page navigation"] ul li a');
 
       const links = await slideLinksLocator.all();
       const slideData = [];
-      const addedUrls = new Set<string>(); // To handle potential duplicates (e.g., current page link)
+      const addedUrls = new Set<string>();
 
       for (const link of links) {
         const slideNumber = (await link.textContent() ?? '').trim();
         const href = await link.getAttribute('href');
-        const title = (await link.getAttribute('title') ?? slideNumber).trim(); // Get title attribute, fallback to slideNumber
-
-        // Filter out non-numeric links like '«' and '»'
+        const title = (await link.getAttribute('title') ?? slideNumber).trim();
         if (href && /^\d+$/.test(slideNumber)) {
           const absoluteUrl = (href === '#') ? page.url() : new URL(href, baseUrl).toString();
 
-          // Avoid adding duplicate entries if href="#" points to the same URL
           if (!addedUrls.has(absoluteUrl)) {
             slideData.push({ slideNumber, title, url: absoluteUrl });
             addedUrls.add(absoluteUrl);
@@ -75,13 +68,11 @@ const listSlideLinksTool: Tool = {
         }
       }
 
-      // Sort slides by slide number numerically
       slideData.sort((a, b) => Number.parseInt(a.slideNumber, 10) - Number.parseInt(b.slideNumber, 10));
 
 
       console.log(`Found ${slideData.length} unique slide links.`);
 
-      // Validate the output structure
       const result = ListSlidesOutputSchema.parse({ slides: slideData });
 
       return {
@@ -94,7 +85,7 @@ const listSlideLinksTool: Tool = {
       if (error instanceof Error)
         errorMessage = error.message;
       else
-        errorMessage = String(error); // Fallback for non-Error types
+        errorMessage = String(error);
       try {
         const tab = context.currentTab();
         if (tab) {

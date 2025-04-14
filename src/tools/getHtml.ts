@@ -18,9 +18,8 @@ import type { Context } from '../context';
 import type { Tool, ToolResult } from './tool';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-// McpError and ErrorCode removed as they are not used in this specific tool
 
-const GetHtmlInputSchema = z.object({}); // No input needed
+const GetHtmlInputSchema = z.object({});
 
 const getPageHtmlTool: Tool = {
   schema: {
@@ -29,17 +28,16 @@ const getPageHtmlTool: Tool = {
     inputSchema: zodToJsonSchema(GetHtmlInputSchema),
   },
 
-  capability: 'core', // Or another appropriate capability
+  capability: 'core',
 
   async handle(context: Context, params?: unknown): Promise<ToolResult> {
     try {
-      const tab = await context.ensureTab(); // Ensure there is an active tab
+      const tab = await context.ensureTab();
       const page = tab.page;
 
       console.log('Getting page HTML content...');
       const htmlContent = await page.content();
 
-      // Return the HTML content as text
       return {
         content: [{ type: 'text', text: htmlContent }],
       };
@@ -50,8 +48,7 @@ const getPageHtmlTool: Tool = {
       if (error instanceof Error)
         errorMessage = error.message;
       else
-        errorMessage = String(error); // Fallback for non-Error types
-      // Attempt to take screenshot on error
+        errorMessage = String(error);
       try {
         const tab = context.currentTab();
         if (tab) {
@@ -63,7 +60,6 @@ const getPageHtmlTool: Tool = {
       } catch (screenshotError) {
         console.error('Failed to take screenshot:', screenshotError);
       }
-      // Return error message
       return {
         content: [{ type: 'text', text: `Failed to get page HTML: ${errorMessage}` }],
         isError: true,
