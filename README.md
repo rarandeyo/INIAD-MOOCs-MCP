@@ -1,325 +1,149 @@
-## Playwright MCP
+# INIAD MOOCs MCP サーバー
 
-A Model Context Protocol (MCP) server that provides browser automation capabilities using [Playwright](https://playwright.dev). This server enables LLMs to interact with web pages through structured accessibility snapshots, bypassing the need for screenshots or visually-tuned models.
+> **注意**
+> 本リポジトリは [Playwright MCP](https://github.com/microsoft/playwright-mcp) を直接フォークしたものではなく、参考にして独自に作成・拡張したものです。
+> また、本家MCPの変更に合わせて随時メンテナンス・追従する予定は基本的にありません。
 
-### Key Features
+大学の課題提出サイト [INIAD MOOCs](https://moocs.iniad.org/) への自動ログイン・課題提出・ファイルアップロード・フォーム入力を自動化する [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) サーバーです。  
+[Playwright MCP](https://github.com/microsoft/playwright-mcp) をベースに、INIAD向けの自動化ツールを追加しています。
 
-- **Fast and lightweight**: Uses Playwright's accessibility tree, not pixel-based input.
-- **LLM-friendly**: No vision models needed, operates purely on structured data.
-- **Deterministic tool application**: Avoids ambiguity common with screenshot-based approaches.
+## 主な特徴
 
-### Use Cases
+- **INIADアカウントで自動ログイン**（環境変数で指定）
+- **講義一覧・講義回・スライド・課題内容の自動取得**
+- **課題提出の自動化（ファイルアップロード・フォーム入力）**
+- **MCPプロトコル対応**：ClaudeやCursor、VSCode等各種MCPクライアントから利用可能
 
-- Web navigation and form-filling
-- Data extraction from structured content
-- Automated testing driven by LLMs
-- General-purpose browser interaction for agents
+## 必要な環境変数
 
-### Example config
+- `INIAD_USERNAME` : INIAD MOOCsのユーザー名（メールアドレスの「@」より前の部分、かつ必ずsで始まる学籍番号を指定してください。
+- `INIAD_PASSWORD` : INIAD MOOCsのパスワード
 
-```js
+## 使用方法
+
+### 1. MCPクライアント設定例
+
+Cursor、Cline、Claude Desktop など主要なMCPクライアントでは、以下のような 例: `mcp_config.json` を用いてMCPサーバーを登録できます。
+
+```json
 {
   "mcpServers": {
-    "playwright": {
+    "iniad-moocs-mcp": {
       "command": "npx",
       "args": [
-        "@playwright/mcp@latest"
-      ]
-    }
-  }
-}
-```
-
-
-#### Installation in VS Code
-
-Install the Playwright MCP server in VS Code using one of these buttons:
-
-<!--
-// Generate using?:
-const config = JSON.stringify({ name: 'playwright', command: 'npx', args: ["-y", "@playwright/mcp@latest"] });
-const urlForWebsites = `vscode:mcp/install?${encodeURIComponent(config)}`;
-// Github markdown does not allow linking to `vscode:` directly, so you can use our redirect:
-const urlForGithub = `https://insiders.vscode.dev/redirect?url=${encodeURIComponent(urlForWebsites)}`;
--->
-
-[<img src="https://img.shields.io/badge/VS_Code-VS_Code?style=flat-square&label=Install%20Server&color=0098FF" alt="Install in VS Code">](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522playwright%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522-y%2522%252C%2522%2540playwright%252Fmcp%2540latest%2522%255D%257D)  [<img alt="Install in VS Code Insiders" src="https://img.shields.io/badge/VS_Code_Insiders-VS_Code_Insiders?style=flat-square&label=Install%20Server&color=24bfa5">](https://insiders.vscode.dev/redirect?url=vscode-insiders%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522playwright%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522-y%2522%252C%2522%2540playwright%252Fmcp%2540latest%2522%255D%257D)
-
-Alternatively, you can install the Playwright MCP server using the VS Code CLI:
-
-```bash
-# For VS Code
-code --add-mcp '{"name":"playwright","command":"npx","args":["@playwright/mcp@latest"]}'
-```
-
-```bash
-# For VS Code Insiders
-code-insiders --add-mcp '{"name":"playwright","command":"npx","args":["@playwright/mcp@latest"]}'
-```
-
-After installation, the Playwright MCP server will be available for use with your GitHub Copilot agent in VS Code.
-
-### CLI Options
-
-The Playwright MCP server supports the following command-line options:
-
-- `--browser <browser>`: Browser or chrome channel to use. Possible values:
-  - `chrome`, `firefox`, `webkit`, `msedge`
-  - Chrome channels: `chrome-beta`, `chrome-canary`, `chrome-dev`
-  - Edge channels: `msedge-beta`, `msedge-canary`, `msedge-dev`
-  - Default: `chrome`
-- `--caps <caps>`: Comma-separated list of capabilities to enable, possible values: tabs, pdf, history, wait, files, install. Default is all.
-- `--cdp-endpoint <endpoint>`: CDP endpoint to connect to
-- `--executable-path <path>`: Path to the browser executable
-- `--headless`: Run browser in headless mode (headed by default)
-- `--port <port>`: Port to listen on for SSE transport
-- `--user-data-dir <path>`: Path to the user data directory
-- `--vision`: Run server that uses screenshots (Aria snapshots are used by default)
-
-### User data directory
-
-Playwright MCP will launch the browser with the new profile, located at
-
-```
-- `%USERPROFILE%\AppData\Local\ms-playwright\mcp-chrome-profile` on Windows
-- `~/Library/Caches/ms-playwright/mcp-chrome-profile` on macOS
-- `~/.cache/ms-playwright/mcp-chrome-profile` on Linux
-```
-
-All the logged in information will be stored in that profile, you can delete it between sessions if you'd like to clear the offline state.
-
-
-### Running headless browser (Browser without GUI).
-
-This mode is useful for background or batch operations.
-
-```js
-{
-  "mcpServers": {
-    "playwright": {
-      "command": "npx",
-      "args": [
-        "@playwright/mcp@latest",
+        "iniad-moocs-mcp",
         "--headless"
-      ]
+      ],
+      "env": {
+        "INIAD_USERNAME": "your_username",
+        "INIAD_PASSWORD": "your_password"
+      }
     }
   }
 }
 ```
 
-### Running headed browser on Linux w/o DISPLAY
+#### ヘッドあり（ブラウザ画面を表示したい場合）
 
-When running headed browser on system w/o display or from worker processes of the IDEs,
-run the MCP server from environment with the DISPLAY and pass the `--port` flag to enable SSE transport.
-
-```bash
-npx @playwright/mcp@latest --port 8931
-```
-
-And then in MCP client config, set the `url` to the SSE endpoint:
-
-```js
+```json
 {
   "mcpServers": {
-    "playwright": {
-      "url": "http://localhost:8931/sse"
-    }
-  }
-}
-```
-
-### Tool Modes
-
-The tools are available in two modes:
-
-1. **Snapshot Mode** (default): Uses accessibility snapshots for better performance and reliability
-2. **Vision Mode**: Uses screenshots for visual-based interactions
-
-To use Vision Mode, add the `--vision` flag when starting the server:
-
-```js
-{
-  "mcpServers": {
-    "playwright": {
+    "iniad-moocs-mcp": {
       "command": "npx",
       "args": [
-        "@playwright/mcp@latest",
-        "--vision"
-      ]
+        "iniad-moocs-mcp"
+      ],
+      "env": {
+        "INIAD_USERNAME": "your_username",
+        "INIAD_PASSWORD": "your_password"
+      }
     }
   }
 }
 ```
 
-Vision Mode works best with the computer use models that are able to interact with elements using
-X Y coordinate space, based on the provided screenshot.
+---
 
-### Programmatic usage with custom transports
+### 2. VS Code からのインストール・起動
 
-```js
-import { createServer } from '@playwright/mcp';
+#### コマンドパレットから
 
-// ...
+1. コマンドパレット（`Ctrl+Shift+P`）を開く
+2. `MCP: Add Server` を選択
+3. 以下の内容を入力
 
-const server = createServer({
-  launchOptions: { headless: true }
-});
-transport = new SSEServerTransport("/messages", res);
-server.connect(transport);
+**ヘッドレスモード:**
+```json
+{"name":"iniad-moocs-mcp","command":"npx","args":["iniad-moocs-mcp","--headless"],"env":{"INIAD_USERNAME":"your_username","INIAD_PASSWORD":"your_password"}}
 ```
 
-### Snapshot-based Interactions
+**ヘッドあり:**
+```json
+{"name":"iniad-moocs-mcp","command":"npx","args":["iniad-moocs-mcp"],"env":{"INIAD_USERNAME":"your_username","INIAD_PASSWORD":"your_password"}}
+```
 
-- **browser_click**
-  - Description: Perform click on a web page
-  - Parameters:
-    - `element` (string): Human-readable element description used to obtain permission to interact with the element
-    - `ref` (string): Exact target element reference from the page snapshot
+#### CLIから直接追加
 
-- **browser_hover**
-  - Description: Hover over element on page
-  - Parameters:
-    - `element` (string): Human-readable element description used to obtain permission to interact with the element
-    - `ref` (string): Exact target element reference from the page snapshot
+**VS Codeの場合:**
+```bash
+code --add-mcp '{"name":"iniad-moocs-mcp","command":"npx","args":["iniad-moocs-mcp","--headless"],"env":{"INIAD_USERNAME":"your_username","INIAD_PASSWORD":"your_password"}}'
+```
 
-- **browser_drag**
-  - Description: Perform drag and drop between two elements
-  - Parameters:
-    - `startElement` (string): Human-readable source element description used to obtain permission to interact with the element
-    - `startRef` (string): Exact source element reference from the page snapshot
-    - `endElement` (string): Human-readable target element description used to obtain permission to interact with the element
-    - `endRef` (string): Exact target element reference from the page snapshot
+**VS Code Insidersの場合:**
+```bash
+code-insiders --add-mcp '{"name":"iniad-moocs-mcp","command":"npx","args":["iniad-moocs-mcp","--headless"],"env":{"INIAD_USERNAME":"your_username","INIAD_PASSWORD":"your_password"}}'
+```
 
-- **browser_type**
-  - Description: Type text into editable element
-  - Parameters:
-    - `element` (string): Human-readable element description used to obtain permission to interact with the element
-    - `ref` (string): Exact target element reference from the page snapshot
-    - `text` (string): Text to type into the element
-    - `submit` (boolean, optional): Whether to submit entered text (press Enter after)
-    - `slowly` (boolean, optional): Whether to type one character at a time. Useful for triggering key handlers in the page. By default entire text is filled in at once.
+---
 
-- **browser_select_option**
-  - Description: Select an option in a dropdown
-  - Parameters:
-    - `element` (string): Human-readable element description used to obtain permission to interact with the element
-    - `ref` (string): Exact target element reference from the page snapshot
-    - `values` (array): Array of values to select in the dropdown. This can be a single value or multiple values.
+### 3. 直接コマンドで起動
 
-- **browser_snapshot**
-  - Description: Capture accessibility snapshot of the current page, this is better than screenshot
-  - Parameters: None
+**ヘッドレスモード:**
+```bash
+npx iniad-moocs-mcp --headless
+```
 
-- **browser_take_screenshot**
-  - Description: Take a screenshot of the current page. You can't perform actions based on the screenshot, use browser_snapshot for actions.
-  - Parameters:
-    - `raw` (boolean, optional): Whether to return without compression (in PNG format). Default is false, which returns a JPEG image.
+**ヘッドあり:**
+```bash
+npx iniad-moocs-mcp
+```
 
-### Vision-based Interactions
+---
 
-- **browser_screen_move_mouse**
-  - Description: Move mouse to a given position
-  - Parameters:
-    - `element` (string): Human-readable element description used to obtain permission to interact with the element
-    - `x` (number): X coordinate
-    - `y` (number): Y coordinate
+### 補足
 
-- **browser_screen_capture**
-  - Description: Take a screenshot of the current page
-  - Parameters: None
+- `--browser <browser>` でブラウザ指定も可能（例: `--browser chrome`）
+- `--vision` でビジョンモード（スクリーンショットベース）も利用可能
 
-- **browser_screen_click**
-  - Description: Click left mouse button
-  - Parameters:
-    - `element` (string): Human-readable element description used to obtain permission to interact with the element
-    - `x` (number): X coordinate
-    - `y` (number): Y coordinate
 
-- **browser_screen_drag**
-  - Description: Drag left mouse button
-  - Parameters:
-    - `element` (string): Human-readable element description used to obtain permission to interact with the element
-    - `startX` (number): Start X coordinate
-    - `startY` (number): Start Y coordinate
-    - `endX` (number): End X coordinate
-    - `endY` (number): End Y coordinate
+## ユーザーデータディレクトリについて
 
-- **browser_screen_type**
-  - Description: Type text
-  - Parameters:
-    - `text` (string): Text to type
-    - `submit` (boolean, optional): Whether to submit entered text (press Enter after)
+Playwright MCP（および本ツール）は、ブラウザを起動する際に「ユーザープロファイル（ユーザーデータ）」を新規作成し、その中にログイン情報やCookie、キャッシュなどを保存します。
 
-- **browser_press_key**
-  - Description: Press a key on the keyboard
-  - Parameters:
-    - `key` (string): Name of the key to press or a character to generate, such as `ArrowLeft` or `a`
+- **保存場所（OSごと）:**
+  - **Windows:**  `%USERPROFILE%\AppData\Local\ms-playwright\mcp-chrome-profile`
+  - **macOS:**    `~/Library/Caches/ms-playwright/mcp-chrome-profile`
+  - **Linux:**    `~/.cache/ms-playwright/mcp-chrome-profile`
 
-### Tab Management
+このディレクトリには、ログイン状態やセッション情報、履歴などが保存されます。
 
-- **browser_tab_list**
-  - Description: List browser tabs
-  - Parameters: None
+- **メリット:**
+  - 一度ログインすれば、次回以降も自動でログイン状態が維持されます。
+  - 毎回ログインし直す必要がありません。
+- **リセット方法:**
+  - セッションやログイン状態をリセットしたい場合は、このディレクトリを削除してください。
+  - 削除すると、次回起動時は新しいプロファイルでまっさらな状態から開始されます。
 
-- **browser_tab_new**
-  - Description: Open a new tab
-  - Parameters:
-    - `url` (string, optional): The URL to navigate to in the new tab. If not provided, the new tab will be blank.
+---
 
-- **browser_tab_select**
-  - Description: Select a tab by index
-  - Parameters:
-    - `index` (number): The index of the tab to select
 
-- **browser_tab_close**
-  - Description: Close a tab
-  - Parameters:
-    - `index` (number, optional): The index of the tab to close. Closes current tab if not provided.
+## ライセンス
 
-### Navigation
+Apache License 2.0
 
-- **browser_navigate**
-  - Description: Navigate to a URL
-  - Parameters:
-    - `url` (string): The URL to navigate to
+---
 
-- **browser_navigate_back**
-  - Description: Go back to the previous page
-  - Parameters: None
+**参考**  
+- [Playwright MCP README](https://github.com/microsoft/playwright-mcp/blob/main/README.md)  
+- [Model Context Protocol (MCP) 公式ドキュメント](https://modelcontextprotocol.io/llms-full.txt)
 
-- **browser_navigate_forward**
-  - Description: Go forward to the next page
-  - Parameters: None
-
-### Keyboard
-
-- **browser_press_key**
-  - Description: Press a key on the keyboard
-  - Parameters:
-    - `key` (string): Name of the key to press or a character to generate, such as `ArrowLeft` or `a`
-
-### Files and Media
-
-- **browser_file_upload**
-  - Description: Choose one or multiple files to upload
-  - Parameters:
-    - `paths` (array): The absolute paths to the files to upload. Can be a single file or multiple files.
-
-- **browser_pdf_save**
-  - Description: Save page as PDF
-  - Parameters: None
-
-### Utilities
-
-- **browser_wait**
-  - Description: Wait for a specified time in seconds
-  - Parameters:
-    - `time` (number): The time to wait in seconds (capped at 10 seconds)
-
-- **browser_close**
-  - Description: Close the page
-  - Parameters: None
-
-- **browser_install**
-  - Description: Install the browser specified in the config. Call this if you get an error about the browser not being installed.
-  - Parameters: None
