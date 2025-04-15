@@ -69,7 +69,7 @@ const navigate: ToolFactory = captureSnapshot => ({
           data: coursesResult.content || [],
           isError: coursesResult.isError,
         };
-        additionalContent.push(listContent as any);
+        additionalContent.push({ type: 'text', text: JSON.stringify(listContent) });
         if (!coursesResult.isError)
           console.log('Successfully listed courses.');
         else
@@ -84,7 +84,7 @@ const navigate: ToolFactory = captureSnapshot => ({
           data: lecturesResult.content || [],
           isError: lecturesResult.isError,
         };
-        additionalContent.push(listContent as any);
+        additionalContent.push({ type: 'text', text: JSON.stringify(listContent) });
         if (!lecturesResult.isError)
           console.log('Successfully listed lectures.');
         else
@@ -99,7 +99,7 @@ const navigate: ToolFactory = captureSnapshot => ({
           data: slidesResult.content || [],
           isError: slidesResult.isError,
         };
-        additionalContent.push(listContent as any);
+        additionalContent.push({ type: 'text', text: JSON.stringify(listContent) });
         if (!slidesResult.isError)
           console.log('Successfully listed slides.');
         else
