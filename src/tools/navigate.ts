@@ -46,53 +46,71 @@ const navigate: ToolFactory = captureSnapshot => ({
     });
 
     const currentUrl = currentTab.page.url();
-    let additionalContent: ToolResult['content'] = [];
+    const additionalContent: ToolResult['content'] = [];
 
     try {
       const coursesRegex = new RegExp('^https://moocs\\.iniad\\.org/courses/?$');
       const coursePageRegex = new RegExp('^https://moocs\\.iniad\\.org/courses/\\d{4}/[A-Z0-9]+/?$');
       const lectureOrSlidePageRegex = new RegExp('^https://moocs\\.iniad\\.org/courses/\\d{4}/[A-Z0-9]+/[A-Za-z0-9_-]+/?(\\d+)?/?$');
 
+      type AutoFetchedListContent = {
+        type: 'autoFetchedList';
+        sourceTool: 'listCourses' | 'listLectures' | 'listSlides';
+        data: ToolResult['content'];
+        isError?: boolean;
+      };
+
       if (coursesRegex.test(currentUrl)) {
         console.log('Detected courses page, attempting to list courses...');
         const coursesResult = await listCoursesTool[0].handle(context);
-        if (coursesResult.content && !coursesResult.isError) {
-          additionalContent = additionalContent.concat(coursesResult.content);
+        const listContent: AutoFetchedListContent = {
+          type: 'autoFetchedList',
+          sourceTool: 'listCourses',
+          data: coursesResult.content || [],
+          isError: coursesResult.isError,
+        };
+        additionalContent.push(listContent as any);
+        if (!coursesResult.isError)
           console.log('Successfully listed courses.');
-        } else {
-          console.warn('Failed to list courses or result was empty/error.');
-          if (coursesResult.content)
-            additionalContent = additionalContent.concat(coursesResult.content);
-        }
+        else
+          console.warn('Failed to list courses or result was error.');
+
       } else if (coursePageRegex.test(currentUrl)) {
         console.log('Detected course page, attempting to list lectures...');
         const lecturesResult = await listLectureLinksTool[0].handle(context);
-        if (lecturesResult.content && !lecturesResult.isError) {
-          additionalContent = additionalContent.concat(lecturesResult.content);
+        const listContent: AutoFetchedListContent = {
+          type: 'autoFetchedList',
+          sourceTool: 'listLectures',
+          data: lecturesResult.content || [],
+          isError: lecturesResult.isError,
+        };
+        additionalContent.push(listContent as any);
+        if (!lecturesResult.isError)
           console.log('Successfully listed lectures.');
-        } else {
-          console.warn('Failed to list lectures or result was empty/error.');
-          if (lecturesResult.content)
-            additionalContent = additionalContent.concat(lecturesResult.content);
-        }
+        else
+          console.warn('Failed to list lectures or result was error.');
+
       } else if (lectureOrSlidePageRegex.test(currentUrl)) {
         console.log('Detected lecture/slide page, attempting to list slides...');
         const slidesResult = await listSlideLinksTool[0].handle(context);
-        if (slidesResult.content && !slidesResult.isError) {
-          additionalContent = additionalContent.concat(slidesResult.content);
+        const listContent: AutoFetchedListContent = {
+          type: 'autoFetchedList',
+          sourceTool: 'listSlides',
+          data: slidesResult.content || [],
+          isError: slidesResult.isError,
+        };
+        additionalContent.push(listContent as any);
+        if (!slidesResult.isError)
           console.log('Successfully listed slides.');
-        } else {
-          console.warn('Failed to list slides or result was empty/error.');
-          if (slidesResult.content)
-            additionalContent = additionalContent.concat(slidesResult.content);
-        }
+        else
+          console.warn('Failed to list slides or result was error.');
       }
     } catch (error) {
       console.error('Error during automatic list fetching after navigation:', error);
-      additionalContent.push({ type: 'text', text: `Error fetching lists after navigation: ${error instanceof Error ? error.message : String(error)}` });
+      additionalContent.push({ type: 'text', text: `Error fetching lists after navigation: ${error instanceof Error ? error.message : String(error)}` } as any);
     }
 
-    const finalContent = (navigateResult.content || []).concat(additionalContent);
+    const finalContent = additionalContent.concat(navigateResult.content || []);
 
     return {
       ...navigateResult,
