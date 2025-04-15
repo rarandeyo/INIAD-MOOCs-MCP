@@ -16,16 +16,10 @@
 
 import { createServerWithTools } from './server';
 import common from './tools/common';
-import files from './tools/files';
-import install from './tools/install';
-import keyboard from './tools/keyboard';
 import navigate from './tools/navigate';
-import pdf from './tools/pdf';
 import snapshot from './tools/snapshot';
 import tabs from './tools/tabs';
-import screen from './tools/screen';
 import login from './tools/login';
-import getHtml from './tools/getHtml';
 import listLectures from './tools/listLectures';
 import listSlides from './tools/listSlides';
 import listCourses from './tools/listCourses';
@@ -38,15 +32,10 @@ import type { LaunchOptions } from 'playwright';
 
 const snapshotTools: Tool[] = [
   ...common,
-  ...files(true),
-  ...install,
-  ...keyboard(true),
   ...navigate(true),
-  ...pdf,
   ...snapshot,
   ...tabs(true),
   ...login,
-  ...getHtml,
   ...listLectures,
   ...listSlides,
   ...listCourses,
@@ -55,15 +44,9 @@ const snapshotTools: Tool[] = [
 
 const screenshotTools: Tool[] = [
   ...common,
-  ...files(false),
-  ...install,
-  ...keyboard(false),
   ...navigate(false),
-  ...pdf,
-  ...screen,
   ...tabs(false),
   ...login,
-  ...getHtml,
   ...listLectures,
   ...listSlides,
   ...listCourses,
