@@ -1,17 +1,17 @@
 {
-  "name": "@playwright/mcp",
-  "version": "0.0.10",
-  "description": "Playwright Tools for MCP",
+  "name": "iniad-moocs-mcp",
+  "version": "0.0.1",
+  "description": "Auto assignment submitter for INIAD MOOCs",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/microsoft/playwright-mcp.git"
+    "url": "git+https://github.com/rarandeyo/INIAD-MOOCs-MCP.git"
   },
-  "homepage": "https://playwright.dev",
+  "homepage": "https://github.com/rarandeyo/INIAD-MOOCs-MCP",
   "engines": {
     "node": ">=18"
   },
   "author": {
-    "name": "Microsoft Corporation"
+    "name": "rarandeyo"
   },
   "license": "Apache-2.0",
   "scripts": {
@@ -51,6 +51,6 @@
     "typescript": "^5.8.2"
   },
   "bin": {
-    "mcp-server-playwright": "cli.js"
+    "iniad-moocs-mcp": "cli.js"
   }
 }
