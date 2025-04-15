@@ -1,4 +1,4 @@
-# INIAD MOOCs MCP サーバー
+# 非公式 INIAD MOOCs MCP サーバー
 
 大学の課題提出サイト [INIAD MOOCs](https://moocs.iniad.org/) への自動ログイン・課題提出・ファイルアップロード・フォーム入力を自動化する [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) サーバーです。  
 [Playwright MCP](https://github.com/microsoft/playwright-mcp) をベースに、INIAD向けの自動化ツールを追加しています。
@@ -146,9 +146,9 @@ Apache License 2.0
 
 ## 注意事項・コントリビューション
 
-⚠️ **注意**  
-本リポジトリは [Playwright MCP](https://github.com/microsoft/playwright-mcp) を直接フォークしたものではなく、参考にして独自に作成・拡張したものです。  
-よって本家MCPの変更に合わせて随時メンテナンス・追従する可能性は低いです。
+⚠️ **非公式・自己責任について**  
+- 本ツールはINIAD公式・東洋大学公式のものではありません。  
+- 本ツールの利用によって生じたいかなる損害・不利益についても、開発者は一切責任を負いません。利用は自己責任でお願いします。
 
 💡 **コントリビューション歓迎**  
 バグ報告・機能要望・プルリクエスト等は歓迎です！
