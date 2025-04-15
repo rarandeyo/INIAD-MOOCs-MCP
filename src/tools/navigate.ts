@@ -16,9 +16,11 @@
 
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-
-import type { ToolFactory } from './tool';
-
+import type { Context } from '../context';
+import type { ToolFactory, ToolResult } from './tool';
+import listCoursesTool from './listCourses';
+import listLectureLinksTool from './listLectures';
+import listSlideLinksTool from './listSlides';
 const navigateSchema = z.object({
   url: z.string().describe('The URL to navigate to'),
 });
@@ -30,15 +32,72 @@ const navigate: ToolFactory = captureSnapshot => ({
     description: 'Navigate to a URL',
     inputSchema: zodToJsonSchema(navigateSchema),
   },
-  handle: async (context, params) => {
+  handle: async (context: Context, params: unknown): Promise<ToolResult> => {
     const validatedParams = navigateSchema.parse(params);
     const currentTab = await context.ensureTab();
-    return await currentTab.run(async tab => {
-      await tab.navigate(validatedParams.url);
+    const targetUrl = validatedParams.url;
+    console.log(`Navigating to ${targetUrl}, capture snapshot: ${captureSnapshot}`);
+
+    const navigateResult = await currentTab.run(async tab => {
+      await tab.navigate(targetUrl);
     }, {
-      status: `Navigated to ${validatedParams.url}`,
-      captureSnapshot,
+      status: `Navigated to ${targetUrl}`,
+      captureSnapshot: captureSnapshot,
     });
+
+    const currentUrl = currentTab.page.url();
+    let additionalContent: ToolResult['content'] = [];
+
+    try {
+      const coursesRegex = new RegExp('^https://moocs\\.iniad\\.org/courses/?$');
+      const coursePageRegex = new RegExp('^https://moocs\\.iniad\\.org/courses/\\d{4}/[A-Z0-9]+/?$');
+      const lectureOrSlidePageRegex = new RegExp('^https://moocs\\.iniad\\.org/courses/\\d{4}/[A-Z0-9]+/[A-Za-z0-9_-]+/?(\\d+)?/?$');
+
+      if (coursesRegex.test(currentUrl)) {
+        console.log('Detected courses page, attempting to list courses...');
+        const coursesResult = await listCoursesTool[0].handle(context);
+        if (coursesResult.content && !coursesResult.isError) {
+          additionalContent = additionalContent.concat(coursesResult.content);
+          console.log('Successfully listed courses.');
+        } else {
+          console.warn('Failed to list courses or result was empty/error.');
+          if (coursesResult.content)
+            additionalContent = additionalContent.concat(coursesResult.content);
+        }
+      } else if (coursePageRegex.test(currentUrl)) {
+        console.log('Detected course page, attempting to list lectures...');
+        const lecturesResult = await listLectureLinksTool[0].handle(context);
+        if (lecturesResult.content && !lecturesResult.isError) {
+          additionalContent = additionalContent.concat(lecturesResult.content);
+          console.log('Successfully listed lectures.');
+        } else {
+          console.warn('Failed to list lectures or result was empty/error.');
+          if (lecturesResult.content)
+            additionalContent = additionalContent.concat(lecturesResult.content);
+        }
+      } else if (lectureOrSlidePageRegex.test(currentUrl)) {
+        console.log('Detected lecture/slide page, attempting to list slides...');
+        const slidesResult = await listSlideLinksTool[0].handle(context);
+        if (slidesResult.content && !slidesResult.isError) {
+          additionalContent = additionalContent.concat(slidesResult.content);
+          console.log('Successfully listed slides.');
+        } else {
+          console.warn('Failed to list slides or result was empty/error.');
+          if (slidesResult.content)
+            additionalContent = additionalContent.concat(slidesResult.content);
+        }
+      }
+    } catch (error) {
+      console.error('Error during automatic list fetching after navigation:', error);
+      additionalContent.push({ type: 'text', text: `Error fetching lists after navigation: ${error instanceof Error ? error.message : String(error)}` });
+    }
+
+    const finalContent = (navigateResult.content || []).concat(additionalContent);
+
+    return {
+      ...navigateResult,
+      content: finalContent,
+    };
   },
 });
 

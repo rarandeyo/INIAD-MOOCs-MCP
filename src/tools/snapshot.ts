@@ -38,25 +38,6 @@ const elementSchema = z.object({
   ref: z.string().describe('Exact target element reference from the page snapshot'),
 });
 
-const click: Tool = {
-  capability: 'core',
-  schema: {
-    name: 'browser_click',
-    description: 'Perform click on a web page',
-    inputSchema: zodToJsonSchema(elementSchema),
-  },
-
-  handle: async (context, params) => {
-    const validatedParams = elementSchema.parse(params);
-    return await context.currentTab().runAndWaitWithSnapshot(async tab => {
-      const locator = tab.lastSnapshot().refLocator(validatedParams.ref);
-      await locator.click();
-    }, {
-      status: `Clicked "${validatedParams.element}"`,
-    });
-  },
-};
-
 const dragSchema = z.object({
   startElement: z.string().describe('Human-readable source element description used to obtain the permission to interact with the element'),
   startRef: z.string().describe('Exact source element reference from the page snapshot'),
@@ -181,7 +162,6 @@ const screenshot: Tool = {
 
 export default [
   snapshot,
-  click,
   drag,
   hover,
   type,
