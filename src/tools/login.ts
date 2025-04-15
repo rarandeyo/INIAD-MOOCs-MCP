@@ -63,7 +63,9 @@ const loginTool: Tool = {
           try {
             await page.waitForSelector(moocsLoginSuccessIndicatorSelector, { state: 'visible', timeout: 1000 });
             console.log('Already logged in to INIAD MOOCs.');
-            const result = { success: true, message: 'Already logged in to INIAD MOOCs.' };
+            console.log('Navigating to courses page...');
+            await page.goto('https://moocs.iniad.org/courses');
+            const result = { success: true, message: 'Already logged in to INIAD MOOCs and navigated to courses page.' };
             return { content: [{ type: 'text', text: JSON.stringify(result) }] };
           } catch (e) {
             console.log('Could not confirm MOOCs login state, proceeding to ID Manager check just in case.');
@@ -94,7 +96,9 @@ const loginTool: Tool = {
         await page.waitForSelector(moocsLoginSuccessIndicatorSelector, { state: 'visible', timeout: 1000 });
 
         console.log('Login successful!');
-        const result = { success: true, message: 'Successfully logged in to INIAD MOOCs using INIAD Account.' };
+        console.log('Navigating to courses page...');
+        await page.goto('https://moocs.iniad.org/courses');
+        const result = { success: true, message: 'Successfully logged in to INIAD MOOCs using INIAD Account and navigated to courses page.' };
         return { content: [{ type: 'text', text: JSON.stringify(result) }] };
       }
       console.log('ID Manager login step skipped or already completed.');
@@ -102,7 +106,9 @@ const loginTool: Tool = {
       try {
         await page.waitForSelector(moocsLoginSuccessIndicatorSelector, { state: 'visible', timeout: 1000 });
         console.log('Confirmed login state on INIAD MOOCs.');
-        const result = { success: true, message: 'Login to INIAD MOOCs confirmed.' };
+        console.log('Navigating to courses page...');
+        await page.goto('https://moocs.iniad.org/courses');
+        const result = { success: true, message: 'Login to INIAD MOOCs confirmed and navigated to courses page.' };
         return { content: [{ type: 'text', text: JSON.stringify(result) }] };
       } catch (e) {
         console.error('Failed to confirm login state on MOOCs after skipping ID Manager steps.');
