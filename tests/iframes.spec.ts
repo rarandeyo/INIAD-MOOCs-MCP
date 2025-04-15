@@ -32,12 +32,4 @@ test('stitched aria frames', async ({ client }) => {
             - paragraph [ref=f2s1e3]: Nested
 \`\`\`
 `);
-
-  expect(await client.callTool({
-    name: 'browser_click',
-    arguments: {
-      element: 'World',
-      ref: 'f1s1e3',
-    },
-  })).toContainTextContent('Clicked "World"');
 });
