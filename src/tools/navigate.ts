@@ -21,6 +21,8 @@ import type { ToolFactory, ToolResult } from './tool';
 import listCoursesTool from './listCourses';
 import listLectureLinksTool from './listLectures';
 import listSlideLinksTool from './listSlides';
+import commonTools from './common';
+const waitTool = commonTools.find(tool => tool.schema.name === 'browser_wait');
 const navigateSchema = z.object({
   url: z.string().describe('The URL to navigate to'),
 });
@@ -40,6 +42,13 @@ const navigate: ToolFactory = captureSnapshot => ({
 
     const navigateResult = await currentTab.run(async tab => {
       await tab.navigate(targetUrl);
+      if (waitTool) {
+        console.log('Waiting for 3 seconds after navigation using waitTool...');
+        await waitTool.handle(context, { time: 2 });
+        console.log('Wait finished.');
+      } else {
+        console.warn('waitTool not found in commonTools.');
+      }
     }, {
       status: `Navigated to ${targetUrl}`,
       captureSnapshot: captureSnapshot,
