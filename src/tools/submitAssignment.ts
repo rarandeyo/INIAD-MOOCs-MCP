@@ -28,7 +28,7 @@ const operationSchema = z.object({
     z.string(),
     z.array(z.string()),
     z.undefined(),
-  ]).optional().describe('Value needed for the action (text for type, options for select, file paths for upload)'), // file paths の記述を戻す
+  ]).optional().describe('Value needed for the action (text for type, options for select, file paths for upload). IMPORTANT: File paths for upload MUST be absolute paths.'),
   element: z.string().optional().describe('Human-readable element description (used for status reporting)'), // オプショナルで追加
 });
 
