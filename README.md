@@ -36,7 +36,7 @@ Cursor、Cline、Claude Desktop など主要なMCPホストでは、以下のよ
     "iniad-moocs-mcp": {
       "command": "npx",
       "args": [
-        "iniad-moocs-mcp",
+        "@rarandeyo/iniad-moocs-mcp",
         "--headless"
       ],
       "env": {
@@ -56,7 +56,7 @@ Cursor、Cline、Claude Desktop など主要なMCPホストでは、以下のよ
     "iniad-moocs-mcp": {
       "command": "npx",
       "args": [
-        "iniad-moocs-mcp"
+        "@rarandeyo/iniad-moocs-mcp"
       ],
       "env": {
         "INIAD_USERNAME": "your_username",
@@ -79,45 +79,27 @@ Cursor、Cline、Claude Desktop など主要なMCPホストでは、以下のよ
 
 **ヘッドレスモード:**
 ```json
-{"name":"iniad-moocs-mcp","command":"npx","args":["iniad-moocs-mcp","--headless"],"env":{"INIAD_USERNAME":"your_username","INIAD_PASSWORD":"your_password"}}
+{"name":"iniad-moocs-mcp","command":"npx","args":["@rarandeyo/iniad-moocs-mcp","--headless"],"env":{"INIAD_USERNAME":"your_username","INIAD_PASSWORD":"your_password"}}
 ```
 
 **ヘッドあり:**
 ```json
-{"name":"iniad-moocs-mcp","command":"npx","args":["iniad-moocs-mcp"],"env":{"INIAD_USERNAME":"your_username","INIAD_PASSWORD":"your_password"}}
+{"name":"iniad-moocs-mcp","command":"npx","args":["@rarandeyo/iniad-moocs-mcp"],"env":{"INIAD_USERNAME":"your_username","INIAD_PASSWORD":"your_password"}}
 ```
 
 #### CLIから直接追加
 
 **VS Codeの場合:**
 ```bash
-code --add-mcp '{"name":"iniad-moocs-mcp","command":"npx","args":["iniad-moocs-mcp","--headless"],"env":{"INIAD_USERNAME":"your_username","INIAD_PASSWORD":"your_password"}}'
+code --add-mcp '{"name":"iniad-moocs-mcp","command":"npx","args":["@rarandeyo/iniad-moocs-mcp","--headless"],"env":{"INIAD_USERNAME":"your_username","INIAD_PASSWORD":"your_password"}}'
 ```
 
 **VS Code Insidersの場合:**
 ```bash
-code-insiders --add-mcp '{"name":"iniad-moocs-mcp","command":"npx","args":["iniad-moocs-mcp","--headless"],"env":{"INIAD_USERNAME":"your_username","INIAD_PASSWORD":"your_password"}}'
+code-insiders --add-mcp '{"name":"iniad-moocs-mcp","command":"npx","args":["@rarandeyo/iniad-moocs-mcp","--headless"],"env":{"INIAD_USERNAME":"your_username","INIAD_PASSWORD":"your_password"}}'
 ```
 
----
 
-### 3. 直接コマンドで起動
-
-**ヘッドレスモード:**
-```bash
-npx iniad-moocs-mcp --headless
-```
-
-**ヘッドあり:**
-```bash
-npx iniad-moocs-mcp
-```
-
----
-
-### 補足
-
-- `--browser <browser>` でブラウザ指定も可能（例: `--browser chrome`）
 
 
 ## ユーザーデータディレクトリについて
