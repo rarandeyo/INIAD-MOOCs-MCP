@@ -122,11 +122,46 @@ const submitAssignment: Tool = {
       await submitLocator.click();
       performedActions.push(`Clicked "${submitButtonName}"`);
 
-      const inputActions = performedActions.slice(0, -1);
-      const submitAction = performedActions[performedActions.length - 1];
-      const statusMessage = `Successfully performed ${inputActions.length} input operations and clicked the submit button:\n- ${inputActions.join('\n- ')}\n- ${submitAction}`;
+      // Wait for dialog to appear using browser_wait
+      await page.waitForTimeout(1000);
+
+      // Automatically handle dialog that may appear after clicking submit
+      let dialogErrorDetected = false;
+      const pendingDialog: any = (tab as any).pendingDialog;
+      if (pendingDialog) {
+        try {
+          const dialogMessage = pendingDialog.message();
+
+          // Expected messages (Japanese and English lines may be separated by newline)
+          const expectedJP = 'すべての回答を保存しました。';
+          const expectedEN = 'All your answers have been saved.';
+
+          const normalizedMessage = dialogMessage.trim();
+
+          if (!normalizedMessage.includes(expectedJP) && !normalizedMessage.includes(expectedEN)) {
+            dialogErrorDetected = true;
+            performedActions.push(`Unexpected dialog message detected: "${dialogMessage}"`);
+          }
+
+          await pendingDialog.accept();
+          performedActions.push(`Dialog "${pendingDialog.type()}" with message "${dialogMessage}" accepted automatically`);
+        } catch (dialogError) {
+          dialogErrorDetected = true;
+          performedActions.push(`Failed to automatically handle dialog: ${dialogError}`);
+        } finally {
+          (tab as any).pendingDialog = undefined;
+        }
+      } else {
+        // No dialog appeared; treat as error
+        dialogErrorDetected = true;
+        performedActions.push('Error: No confirmation dialog appeared after clicking submit');
+      }
+
+      const inputActionCount = validatedParams.operations.length;
+      const statusMessage = `Successfully performed ${inputActionCount} input operations, clicked the submit button, and handled any dialogs if present:\n- ${performedActions.join('\n- ')}`;
       return {
         content: [{ type: 'text', text: statusMessage }],
+        isError: dialogErrorDetected,
       };
 
     } catch (error: any) {
