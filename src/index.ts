@@ -24,6 +24,7 @@ import listLectures from './tools/listLectures';
 import listSlides from './tools/listSlides';
 import listCourses from './tools/listCourses';
 import submitAssignment from './tools/submitAssignment';
+import handleDialog from './tools/handleDialog';
 import { console as consoleResource } from './resources/console';
 import type { Tool, ToolCapability } from './tools/tool';
 import type { Resource } from './resources/resource';
@@ -40,6 +41,7 @@ const snapshotTools: Tool[] = [
   ...listSlides,
   ...listCourses,
   ...submitAssignment,
+  ...handleDialog,
 ];
 
 const screenshotTools: Tool[] = [
@@ -50,6 +52,8 @@ const screenshotTools: Tool[] = [
   ...listLectures,
   ...listSlides,
   ...listCourses,
+  ...submitAssignment,
+  ...handleDialog,
 ];
 
 const resources: Resource[] = [

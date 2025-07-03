@@ -179,6 +179,7 @@ export class Tab {
   private _fileChooser: playwright.FileChooser | undefined;
   private _snapshot: PageSnapshot | undefined;
   private _onPageClose: (tab: Tab) => void;
+  pendingDialog: playwright.Dialog | undefined;
 
   constructor(context: Context, page: playwright.Page, onPageClose: (tab: Tab) => void) {
     this.context = context;
@@ -191,6 +192,7 @@ export class Tab {
     });
     page.on('close', () => this._onClose());
     page.on('filechooser', chooser => this._fileChooser = chooser);
+    page.on('dialog', dialog => this.pendingDialog = dialog);
     page.setDefaultNavigationTimeout(60000);
     page.setDefaultTimeout(5000);
   }
@@ -198,6 +200,7 @@ export class Tab {
   private _onClose() {
     this._fileChooser = undefined;
     this._console.length = 0;
+    this.pendingDialog = undefined;
     this._onPageClose(this);
   }
 
@@ -220,7 +223,7 @@ export class Tab {
         this._snapshot = await PageSnapshot.create(this.page);
     }
     const tabList = this.context.tabs().length > 1 ? await this.context.listTabs() + '\n\nCurrent tab:' + '\n' : '';
-    const snapshot = this._snapshot?.text({ status: options?.status, hasFileChooser: !!this._fileChooser }) ?? options?.status ?? '';
+    const snapshot = this._snapshot?.text({ status: options?.status, hasFileChooser: !!this._fileChooser, hasDialog: !!this.pendingDialog }) ?? options?.status ?? '';
     return {
       content: [{
         type: 'text',
@@ -275,7 +278,7 @@ class PageSnapshot {
     return snapshot;
   }
 
-  text(options?: { status?: string, hasFileChooser?: boolean }): string {
+  text(options?: { status?: string, hasFileChooser?: boolean, hasDialog?: boolean }): string {
     const results: string[] = [];
     if (options?.status) {
       results.push(options.status);
@@ -283,6 +286,10 @@ class PageSnapshot {
     }
     if (options?.hasFileChooser) {
       results.push('- There is a file chooser visible that requires browser_file_upload to be called');
+      results.push('');
+    }
+    if (options?.hasDialog) {
+      results.push('- There is a dialog visible that requires browser_handle_dialog to be called');
       results.push('');
     }
     results.push(this._text);
