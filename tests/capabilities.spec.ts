@@ -20,6 +20,7 @@ test('test snapshot tool list', async ({ client }) => {
   const { tools } = await client.listTools();
   expect(new Set(tools.map(t => t.name))).toEqual(new Set([
     'browser_close',
+    'browser_handle_dialog',
     'browser_wait',
     'browser_navigate',
     'browser_navigate_back',
@@ -41,6 +42,7 @@ test('test vision tool list', async ({ visionClient }) => {
   const { tools: visionTools } = await visionClient.listTools();
   expect(new Set(visionTools.map(t => t.name))).toEqual(new Set([
     'browser_close',
+    'browser_handle_dialog',
     'browser_wait',
     'browser_navigate',
     'browser_navigate_back',
@@ -53,6 +55,7 @@ test('test vision tool list', async ({ visionClient }) => {
     'listLectureLinks',
     'listSlideLinks',
     'listCourses',
+    'submit_assignment',
   ]));
 });
 
