@@ -1,6 +1,6 @@
 {
   "name": "@rarandeyo/iniad-moocs-mcp",
-  "version": "0.0.4",
+  "version": "0.0.5-beta.1",
   "description": "Auto assignment submitter for INIAD MOOCs",
   "repository": {
     "type": "git",
